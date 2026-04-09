@@ -14,24 +14,25 @@
         [x-cloak] { display: none !important; }
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .gradient-main { background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-900" x-data="lmsApp()" x-init="initFirebase()">
 
     <div x-show="!isLoggedIn" x-cloak class="min-h-screen flex items-center justify-center gradient-main px-4">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-white/20">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md">
             <div class="text-center mb-8">
                 <span class="text-5xl">🏛️</span>
                 <h2 class="text-3xl font-black text-blue-900 mt-4 tracking-tighter">LMS TERPADU</h2>
                 <p class="text-slate-400 font-medium italic">Kota Palu - Digital Portal 2026</p>
             </div>
             <div class="space-y-4">
-                <input type="email" x-model="authEmail" placeholder="Email Instansi" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition">
-                <input type="password" x-model="authPass" placeholder="Kata Sandi" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition">
-                <button @click="handleLogin()" :disabled="loading" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:scale-[1.02] active:scale-95 transition disabled:opacity-50">
+                <input type="email" x-model="authEmail" placeholder="Email Instansi" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" x-model="authPass" placeholder="Kata Sandi" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500">
+                <button @click="handleLogin()" :disabled="loading" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:scale-[1.02] transition">
                     <span x-text="loading ? 'MENGECEK AKSES...' : 'MASUK KE SISTEM'"></span>
                 </button>
-                <p x-show="errorMsg" class="text-red-500 text-xs text-center font-bold" x-text="errorMsg"></p>
             </div>
         </div>
     </div>
@@ -41,32 +42,24 @@
             <div class="max-w-7xl mx-auto flex justify-between h-20 items-center">
                 <div class="flex items-center space-x-4">
                     <div class="bg-blue-600 text-white p-2 rounded-xl font-black">LMS</div>
-                    <span class="font-black text-blue-900 text-xl tracking-tight hidden md:block uppercase" x-text="role"></span>
+                    <span class="font-black text-blue-900 text-xl tracking-tight uppercase" x-text="role"></span>
                 </div>
-                
                 <div class="flex items-center space-x-6">
-                    <div class="text-right">
+                    <div class="text-right hidden sm:block">
                         <p class="text-sm font-black text-slate-800" x-text="userName"></p>
-                        <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest" x-text="regSekolah"></p>
+                        <p class="text-[10px] font-bold text-blue-500 uppercase" x-text="regSekolah"></p>
                     </div>
-                    <button @click="handleLogout()" class="bg-red-50 text-red-600 p-3 rounded-2xl hover:bg-red-100 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                    </button>
+                    <button @click="handleLogout()" class="bg-red-50 text-red-600 p-3 rounded-2xl hover:bg-red-100">🚪</button>
                 </div>
             </div>
         </nav>
 
         <main class="max-w-7xl mx-auto w-full p-6 flex-grow">
-            
             <div class="mb-8 flex flex-wrap gap-4 items-center justify-between">
-                <div>
-                    <h2 class="text-2xl font-black text-slate-800">Dashboard Utama</h2>
-                    <p class="text-slate-500 text-sm">Selamat bekerja di sistem terpadu.</p>
-                </div>
                 <div class="flex space-x-2">
-                    <button @click="currentTab = 'home'" class="px-4 py-2 rounded-xl font-bold text-sm" :class="currentTab === 'home' ? 'bg-blue-600 text-white' : 'bg-white border text-slate-600'">Home</button>
-                    <template x-if="role === 'admin'">
-                        <button @click="currentTab = 'admin-panel'" class="px-4 py-2 bg-slate-800 text-white rounded-xl font-bold text-sm">Panel Kontrol</button>
+                    <button @click="currentTab = 'home'" class="px-6 py-2 rounded-xl font-bold text-sm transition" :class="currentTab === 'home' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border text-slate-600'">Home</button>
+                    <template x-if="['admin', 'kadis'].includes(role)">
+                        <button @click="currentTab = 'monitoring'" class="px-6 py-2 rounded-xl font-bold text-sm bg-slate-800 text-white">Monitoring Global</button>
                     </template>
                 </div>
             </div>
@@ -74,26 +67,25 @@
             <template x-if="role === 'siswa'">
                 <div class="grid md:grid-cols-3 gap-6" x-show="currentTab === 'home'">
                     <div class="md:col-span-2 space-y-6">
-                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                            <h3 class="font-black text-lg mb-4 flex items-center"><span class="mr-2">📚</span> MATERI PELAJARAN</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <template x-for="m in filteredMateri" :key="m.id">
-                                    <div @click="openMateri(m)" class="p-4 bg-slate-50 border rounded-2xl hover:border-blue-500 hover:shadow-md cursor-pointer transition group">
-                                        <div class="flex justify-between items-start">
-                                            <span class="text-xs font-black text-blue-600 uppercase" x-text="m.tipe"></span>
-                                            <span class="group-hover:translate-x-1 transition">➡️</span>
+                        <div class="bg-white p-6 rounded-3xl border shadow-sm">
+                            <h3 class="font-black text-lg mb-4">✍️ UJIAN & EXAM</h3>
+                            <div class="grid grid-cols-1 gap-3">
+                                <template x-for="u in filteredUjian" :key="u.id">
+                                    <div class="p-4 bg-orange-50 border border-orange-100 rounded-2xl flex justify-between items-center">
+                                        <div>
+                                            <p class="font-bold text-orange-900" x-text="u.judul"></p>
+                                            <p class="text-[10px] font-black uppercase text-orange-500" x-text="u.kategori"></p>
                                         </div>
-                                        <p class="font-bold mt-2" x-text="m.judul"></p>
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase mt-1" x-text="m.mapel"></p>
+                                        <button @click="startUjian(u)" class="bg-orange-600 text-white px-4 py-2 rounded-xl font-bold text-xs">IKUTI UJIAN</button>
                                     </div>
                                 </template>
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-6">
-                        <div @click="openModal('konsultasi')" class="bg-indigo-600 p-6 rounded-3xl text-white cursor-pointer hover:bg-indigo-700 transition shadow-lg shadow-indigo-100">
-                            <h3 class="font-black text-xl">Konsultasi 👋</h3>
-                            <p class="text-sm opacity-80">Hubungi guru pembimbing Anda.</p>
+                    <div class="space-y-4">
+                        <div @click="openModal('konsultasi')" class="bg-indigo-600 p-6 rounded-3xl text-white cursor-pointer shadow-lg shadow-indigo-100">
+                            <h3 class="font-black text-xl text-center">💬 Konsultasi Siswa</h3>
+                            <p class="text-xs text-center opacity-80 mt-1">Ke Guru, Kepsek atau Pengawas</p>
                         </div>
                     </div>
                 </div>
@@ -101,105 +93,66 @@
 
             <template x-if="role === 'guru'">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6" x-show="currentTab === 'home'">
-                    <div @click="openModal('upload')" class="bg-white p-8 rounded-3xl border shadow-sm text-center hover:border-blue-500 cursor-pointer transition">
-                        <div class="text-4xl mb-3">📂</div>
-                        <h3 class="font-black text-slate-700">Bahan Ajar</h3>
+                    <div @click="openModal('upload')" class="bg-white p-6 rounded-3xl border shadow-sm text-center hover:scale-105 transition cursor-pointer">
+                        <div class="text-3xl mb-2">📂</div>
+                        <h3 class="font-black text-sm">Bahan Ajar</h3>
                     </div>
-                    <div @click="openModal('nilai')" class="bg-white p-8 rounded-3xl border shadow-sm text-center hover:border-blue-500 cursor-pointer transition">
-                        <div class="text-4xl mb-3">📝</div>
-                        <h3 class="font-black text-slate-700">Input Nilai</h3>
+                    <div @click="openModal('buat-ujian')" class="bg-white p-6 rounded-3xl border border-orange-200 shadow-sm text-center hover:scale-105 transition cursor-pointer">
+                        <div class="text-3xl mb-2">📝</div>
+                        <h3 class="font-black text-sm">Input Soal Ujian</h3>
                     </div>
-                    <div @click="openModal('kuis')" class="bg-white p-8 rounded-3xl border shadow-sm text-center hover:border-blue-500 cursor-pointer transition">
-                        <div class="text-4xl mb-3">📋</div>
-                        <h3 class="font-black text-slate-700">Buat Kuis</h3>
+                    <div @click="openModal('nilai')" class="bg-white p-6 rounded-3xl border shadow-sm text-center hover:scale-105 transition cursor-pointer">
+                        <div class="text-3xl mb-2">📊</div>
+                        <h3 class="font-black text-sm">Input Nilai</h3>
                     </div>
-                    <div @click="openModal('konsultasi')" class="bg-white p-8 rounded-3xl border shadow-sm text-center hover:border-blue-500 cursor-pointer transition">
-                        <div class="text-4xl mb-3">💬</div>
-                        <h3 class="font-black text-slate-700">Konsultasi</h3>
-                    </div>
-                </div>
-            </template>
-
-            <template x-if="role === 'kadis'">
-                <div class="grid md:grid-cols-2 gap-8" x-init="renderKadisCharts()">
-                    <div class="bg-white p-6 rounded-3xl border shadow-sm">
-                        <h3 class="font-black text-slate-800 mb-4">Grafik Keaktifan Sekolah/Kecamatan</h3>
-                        <canvas id="chartSekolah"></canvas>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl border shadow-sm">
-                        <h3 class="font-black text-slate-800 mb-4">Grafik Keaktifan Pengawas & Guru</h3>
-                        <canvas id="chartSDM"></canvas>
+                    <div @click="openModal('konsultasi')" class="bg-white p-6 rounded-3xl border shadow-sm text-center hover:scale-105 transition cursor-pointer">
+                        <div class="text-3xl mb-2">💬</div>
+                        <h3 class="font-black text-sm">Konsultasi Atasan</h3>
                     </div>
                 </div>
             </template>
 
-            <div x-show="currentTab === 'admin-panel'" class="space-y-8">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div x-show="currentTab === 'monitoring'" class="space-y-6">
+                <div class="grid md:grid-cols-3 gap-6">
                     <div class="bg-white p-6 rounded-3xl border shadow-sm">
-                        <p class="text-[10px] font-black text-slate-400 uppercase">Total Siswa</p>
-                        <p class="text-3xl font-black text-blue-600">1.2K</p>
+                        <p class="text-[10px] font-black text-slate-400 uppercase">Total Konsultasi</p>
+                        <p class="text-3xl font-black text-indigo-600" x-text="totalKonsultasi"></p>
                     </div>
+                    <div class="bg-white p-6 rounded-3xl border shadow-sm">
+                        <p class="text-[10px] font-black text-slate-400 uppercase">Rata-rata Nilai Ujian</p>
+                        <p class="text-3xl font-black text-orange-600">82.5</p>
                     </div>
-
+                    <div class="bg-white p-6 rounded-3xl border shadow-sm">
+                        <p class="text-[10px] font-black text-slate-400 uppercase">Sekolah Teraktif</p>
+                        <p class="text-xl font-black text-emerald-600">SMPN 1 PALU</p>
+                    </div>
+                </div>
+                
                 <div class="bg-white rounded-3xl border shadow-sm overflow-hidden">
-                    <div class="p-6 border-b flex justify-between items-center bg-slate-50">
-                        <h3 class="font-black text-slate-800">Manajemen Pengguna & Sistem</h3>
-                        <div class="flex space-x-2">
-                            <button @click="currentTab = 'register'" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold">Tambah User</button>
-                            <button @click="exportData('pdf')" class="bg-red-500 text-white px-4 py-2 rounded-xl text-xs font-bold">PDF</button>
-                            <button @click="exportData('xls')" class="bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold">XLS</button>
-                        </div>
+                    <div class="p-6 bg-slate-50 border-b flex justify-between items-center">
+                        <h3 class="font-black text-slate-800">Daftar Konsultasi Masuk (Kadis/Admin Only)</h3>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] font-black">
+                            <thead class="bg-slate-50 text-[10px] font-black uppercase text-slate-400">
                                 <tr>
-                                    <th class="p-4">Nama</th>
-                                    <th class="p-4">Role</th>
-                                    <th class="p-4">Instansi</th>
-                                    <th class="p-4">Aksi</th>
+                                    <th class="p-4">Pengirim</th>
+                                    <th class="p-4">Tujuan</th>
+                                    <th class="p-4">Isi Pesan</th>
+                                    <th class="p-4">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="user in allUsers" :key="user.id">
-                                    <tr class="border-t hover:bg-slate-50">
-                                        <td class="p-4 font-bold" x-text="user.nama"></td>
-                                        <td class="p-4 uppercase text-[10px] font-black text-blue-600" x-text="user.role"></td>
-                                        <td class="p-4 text-slate-500" x-text="user.sekolah"></td>
-                                        <td class="p-4 flex space-x-2">
-                                            <button @click="editUser(user)" class="p-2 bg-blue-50 text-blue-600 rounded-lg">✏️</button>
-                                            <button @click="deleteUser(user.id)" class="p-2 bg-red-50 text-red-600 rounded-lg">🗑️</button>
-                                        </td>
+                                <template x-for="k in allKonsultasi" :key="k.id">
+                                    <tr class="border-t">
+                                        <td class="p-4 font-bold" x-text="k.nama_pengirim"></td>
+                                        <td class="p-4 uppercase font-black text-blue-600 text-[10px]" x-text="k.tujuan_role"></td>
+                                        <td class="p-4 text-slate-600" x-text="k.pesan"></td>
+                                        <td class="p-4"><span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded text-[10px] font-black">TERKIRIM</span></td>
                                     </tr>
                                 </template>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
-
-            <div x-show="currentTab === 'register'" x-cloak class="max-w-2xl mx-auto">
-                <div class="bg-white p-8 rounded-[2rem] border shadow-sm">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-black text-slate-800">Registrasi Akun</h2>
-                        <button @click="currentTab = 'admin-panel'" class="text-slate-400 hover:text-slate-600">Batal</button>
-                    </div>
-                    <div class="space-y-4">
-                        <input type="email" x-model="regEmail" placeholder="Email Baru" class="w-full p-4 bg-slate-50 rounded-2xl border outline-none focus:ring-2 focus:ring-green-500">
-                        <input type="password" x-model="regPass" placeholder="Password (min 6)" class="w-full p-4 bg-slate-50 rounded-2xl border outline-none focus:ring-2 focus:ring-green-500">
-                        <input type="text" x-model="regNama" placeholder="Nama Lengkap" class="w-full p-4 bg-slate-50 rounded-2xl border outline-none focus:ring-2 focus:ring-green-500">
-                        <div class="grid grid-cols-2 gap-4">
-                            <select x-model="regRole" class="p-4 bg-slate-50 rounded-2xl border outline-none">
-                                <option value="siswa">Siswa</option>
-                                <option value="guru">Guru</option>
-                                <option value="kepsek">Kepsek</option>
-                                <option value="pengawas">Pengawas</option>
-                                <option value="kadis">Kadis</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                            <input type="text" x-model="regSekolah" placeholder="Nama Sekolah/Instansi" class="p-4 bg-slate-50 rounded-2xl border outline-none">
-                        </div>
-                        <button @click="handleRegister()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black hover:bg-green-700 transition">SIMPAN USER</button>
                     </div>
                 </div>
             </div>
@@ -209,46 +162,48 @@
 
     <div x-show="activeModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div @click="activeModal = null" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
-        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden z-10" x-transition>
+        <div class="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden">
             
             <div class="p-6 border-b flex justify-between items-center bg-slate-50">
-                <h3 class="font-black text-xl text-slate-800 uppercase" x-text="activeModal"></h3>
-                <button @click="activeModal = null" class="bg-slate-200 p-2 rounded-full">✕</button>
+                <h3 class="font-black text-slate-800 uppercase" x-text="activeModal.replace('-', ' ')"></h3>
+                <button @click="activeModal = null" class="text-xl">✕</button>
             </div>
 
-            <div class="p-8" x-show="activeModal === 'upload'">
+            <div class="p-8" x-show="activeModal === 'buat-ujian'">
                 <div class="space-y-4">
-                    <input type="text" x-model="materiData.judul" placeholder="Judul Materi" class="w-full p-4 bg-slate-50 border rounded-2xl">
-                    <input type="text" x-model="materiData.mapel" placeholder="Mata Pelajaran" class="w-full p-4 bg-slate-50 border rounded-2xl">
-                    <select x-model="materiData.tipe" class="w-full p-4 bg-slate-50 border rounded-2xl">
-                        <option value="video">Video (YouTube)</option>
-                        <option value="drive">Google Drive / Link</option>
-                        <option value="doc">Document (PDF/Docx)</option>
-                        <option value="ppt">PowerPoint</option>
+                    <select x-model="ujianData.kategori" class="w-full p-4 bg-slate-50 border rounded-2xl">
+                        <option value="harian">Ujian Harian</option>
+                        <option value="mid">Mid Semester</option>
+                        <option value="semester">Ujian Semester</option>
                     </select>
-                    <input type="text" x-model="materiData.link" placeholder="Tautan / Link File" class="w-full p-4 bg-slate-50 border rounded-2xl">
-                    <button @click="saveMateri()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black">PUBLIKASIKAN MATERI</button>
-                </div>
-            </div>
-
-            <div class="p-8" x-show="activeModal === 'viewMateri'">
-                <div class="text-center">
-                    <h2 class="text-2xl font-black mb-2" x-text="selectedMateri?.judul"></h2>
-                    <p class="text-sm font-bold text-blue-600 mb-6 uppercase" x-text="selectedMateri?.tipe"></p>
-                    
-                    <div class="bg-slate-100 p-8 rounded-3xl mb-6">
-                        <p class="text-slate-500 italic mb-4">Sistem mendeteksi tautan luar...</p>
-                        <button @click="window.open(selectedMateri?.link, '_blank')" class="bg-white border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-2xl font-black hover:bg-blue-600 hover:text-white transition">BUKA FILE SEKARANG</button>
-                    </div>
+                    <input type="text" x-model="ujianData.judul" placeholder="Judul Ujian (Contoh: Matematika Bangun Ruang)" class="w-full p-4 bg-slate-50 border rounded-2xl">
+                    <textarea x-model="ujianData.soal" placeholder="Masukkan Link Google Form Soal atau Deskripsi Soal" class="w-full p-4 bg-slate-50 border rounded-2xl h-32"></textarea>
+                    <button @click="saveUjian()" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-orange-100">PUBLIKASIKAN UJIAN</button>
                 </div>
             </div>
 
             <div class="p-8" x-show="activeModal === 'konsultasi'">
-                <div class="bg-indigo-50 p-6 rounded-3xl mb-6">
-                    <p class="text-indigo-900 font-bold italic">"Guru adalah orang tua kalian di sekolah. Tanyakan apa saja terkait pelajaran."</p>
+                <div class="space-y-4">
+                    <p class="text-xs font-bold text-slate-400">Pilih Tujuan Konsultasi:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <template x-if="role === 'siswa'">
+                            <div class="contents">
+                                <button @click="targetKonsul = 'guru'" :class="targetKonsul === 'guru' ? 'bg-blue-600 text-white' : 'bg-slate-100'" class="px-4 py-2 rounded-xl text-xs font-bold">GURU</button>
+                                <button @click="targetKonsul = 'kepsek'" :class="targetKonsul === 'kepsek' ? 'bg-blue-600 text-white' : 'bg-slate-100'" class="px-4 py-2 rounded-xl text-xs font-bold">KEPSEK</button>
+                                <button @click="targetKonsul = 'pengawas'" :class="targetKonsul === 'pengawas' ? 'bg-blue-600 text-white' : 'bg-slate-100'" class="px-4 py-2 rounded-xl text-xs font-bold">PENGAWAS</button>
+                            </div>
+                        </template>
+                        <template x-if="role === 'guru'">
+                            <div class="contents">
+                                <button @click="targetKonsul = 'kepsek'" :class="targetKonsul === 'kepsek' ? 'bg-blue-600 text-white' : 'bg-slate-100'" class="px-4 py-2 rounded-xl text-xs font-bold">KEPSEK</button>
+                                <button @click="targetKonsul = 'pengawas'" :class="targetKonsul === 'pengawas' ? 'bg-blue-600 text-white' : 'bg-slate-100'" class="px-4 py-2 rounded-xl text-xs font-bold">PENGAWAS</button>
+                                <button @click="targetKonsul = 'kadis'" :class="targetKonsul === 'kadis' ? 'bg-blue-600 text-white' : 'bg-slate-100'" class="px-4 py-2 rounded-xl text-xs font-bold">KADIS</button>
+                            </div>
+                        </template>
+                    </div>
+                    <textarea x-model="pesanKonsul" placeholder="Tuliskan kendala atau pertanyaan Anda..." class="w-full p-4 bg-slate-50 border rounded-2xl h-32"></textarea>
+                    <button @click="sendKonsultasi()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black">KIRIM PESAN</button>
                 </div>
-                <textarea placeholder="Tulis pesan Anda..." class="w-full p-4 bg-slate-50 border rounded-2xl h-32 mb-4"></textarea>
-                <button class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black">KIRIM KE GURU PEMBIMBING</button>
             </div>
 
         </div>
@@ -265,10 +220,10 @@
         function lmsApp() {
             return {
                 isLoggedIn: false, loading: false, currentTab: 'home', activeModal: null,
-                authEmail: '', authPass: '', errorMsg: '',
-                userName: '', role: '', regSekolah: '',
-                allUsers: [], filteredMateri: [], selectedMateri: null,
-                materiData: { judul: '', mapel: '', tipe: 'video', link: '' },
+                authEmail: '', authPass: '', userName: '', role: '', regSekolah: '',
+                filteredUjian: [], allKonsultasi: [], totalKonsultasi: 0,
+                ujianData: { kategori: 'harian', judul: '', soal: '' },
+                targetKonsul: '', pesanKonsul: '',
 
                 initFirebase() {
                     firebase.initializeApp(fbConfig);
@@ -278,14 +233,11 @@
                 },
 
                 async handleLogin() {
-                    this.loading = true; this.errorMsg = '';
+                    this.loading = true;
                     try {
                         const res = await firebase.auth().signInWithEmailAndPassword(this.authEmail, this.authPass);
                         this.loadUserData(res.user.uid);
-                    } catch (e) {
-                        this.errorMsg = "Akses ditolak. Cek email/password.";
-                        this.loading = false;
-                    }
+                    } catch (e) { alert("Login Gagal!"); this.loading = false; }
                 },
 
                 loadUserData(uid) {
@@ -302,94 +254,58 @@
                 },
 
                 loadInitialData() {
-                    // Load Materi
-                    firebase.database().ref('materi').on('value', snap => {
+                    // Load Ujian
+                    firebase.database().ref('ujian').on('value', snap => {
                         const data = snap.val();
-                        this.filteredMateri = data ? Object.keys(data).map(k => ({id: k, ...data[k]})) : [];
+                        this.filteredUjian = data ? Object.keys(data).map(k => ({id: k, ...data[k]})) : [];
                     });
 
-                    // Load All Users (for Admin)
-                    if (this.role === 'admin') {
-                        firebase.database().ref('users').on('value', snap => {
+                    // Load Konsultasi untuk Monitoring (Kadis/Admin)
+                    if (['admin', 'kadis'].includes(this.role)) {
+                        firebase.database().ref('konsultasi').on('value', snap => {
                             const data = snap.val();
-                            this.allUsers = data ? Object.keys(data).map(k => ({id: k, ...data[k]})) : [];
+                            this.allKonsultasi = data ? Object.keys(data).map(k => ({id: k, ...data[k]})) : [];
+                            this.totalKonsultasi = this.allKonsultasi.length;
                         });
                     }
                 },
 
                 openModal(type) { this.activeModal = type; },
-                
-                openMateri(m) {
-                    this.selectedMateri = m;
-                    this.activeModal = 'viewMateri';
-                },
 
-                async saveMateri() {
-                    if(!this.materiData.judul || !this.materiData.link) return alert("Lengkapi data!");
-                    await firebase.database().ref('materi').push({
-                        ...this.materiData,
+                async saveUjian() {
+                    if(!this.ujianData.judul) return alert("Isi Judul!");
+                    await firebase.database().ref('ujian').push({
+                        ...this.ujianData,
                         pengunggah: this.userName,
                         sekolah: this.regSekolah,
                         timestamp: Date.now()
                     });
                     this.activeModal = null;
-                    alert("Materi berhasil diupload!");
+                    alert("Ujian Berhasil Dipublikasikan!");
                 },
 
-                deleteUser(uid) {
-                    if(confirm("Hapus pengguna ini?")) {
-                        firebase.database().ref('users/' + uid).remove();
-                    }
+                async sendKonsultasi() {
+                    if(!this.targetKonsul || !this.pesanKonsul) return alert("Pilih tujuan dan isi pesan!");
+                    await firebase.database().ref('konsultasi').push({
+                        nama_pengirim: this.userName,
+                        role_pengirim: this.role,
+                        tujuan_role: this.targetKonsul,
+                        pesan: this.pesanKonsul,
+                        sekolah: this.regSekolah,
+                        timestamp: Date.now()
+                    });
+                    this.pesanKonsul = '';
+                    this.activeModal = null;
+                    alert("Konsultasi Terkirim!");
                 },
 
-                renderKadisCharts() {
-                    setTimeout(() => {
-                        const ctx1 = document.getElementById('chartSekolah').getContext('2d');
-                        new Chart(ctx1, {
-                            type: 'bar',
-                            data: {
-                                labels: ['Palu Barat', 'Palu Timur', 'Palu Selatan', 'Palu Utara'],
-                                datasets: [{ label: 'Keaktifan Sekolah (%)', data: [85, 92, 78, 88], backgroundColor: '#3b82f6' }]
-                            }
-                        });
-
-                        const ctx2 = document.getElementById('chartSDM').getContext('2d');
-                        new Chart(ctx2, {
-                            type: 'line',
-                            data: {
-                                labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-                                datasets: [
-                                    { label: 'Guru Aktif', data: [120, 150, 140, 170], borderColor: '#10b981' },
-                                    { label: 'Pengawas Aktif', data: [30, 45, 40, 50], borderColor: '#f59e0b' }
-                                ]
-                            }
-                        });
-                    }, 500);
+                startUjian(u) {
+                    alert("Memulai " + u.judul + ". Anda akan diarahkan ke halaman ujian.");
+                    if(u.soal.includes('http')) window.open(u.soal, '_blank');
                 },
 
-                exportData(format) {
-                    alert("Menghasilkan file " + format.toUpperCase() + "... Mohon tunggu sebentar.");
-                    // Logika ekspor PDF/XLS biasanya memerlukan library jspdf atau xlsx
-                },
-
-                async handleRegister() {
-                    this.loading = true;
-                    try {
-                        const res = await firebase.auth().createUserWithEmailAndPassword(this.regEmail, this.regPass);
-                        await firebase.database().ref('users/' + res.user.uid).set({
-                            nama: this.regNama, role: this.regRole, sekolah: this.regSekolah,
-                            createdAt: new Date().toISOString()
-                        });
-                        alert("User Berhasil Dibuat!");
-                        this.currentTab = 'admin-panel';
-                    } catch (e) { alert(e.message); }
-                    this.loading = false;
-                },
-
-                handleLogout() { 
-                    if(confirm("Keluar dari sistem?")) {
-                        firebase.auth().signOut().then(() => location.reload());
-                    }
+                handleLogout() {
+                    firebase.auth().signOut().then(() => location.reload());
                 }
             }
         }
