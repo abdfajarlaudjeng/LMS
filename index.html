@@ -34,26 +34,14 @@
     </div>
 
     <div x-show="isLoggedIn" x-cloak>
-        <nav class="bg-white shadow-sm border-b sticky top-0 z-50" x-data="{ mobileOpen: false }">
+        <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 flex justify-between h-16 items-center">
                 <div class="flex items-center space-x-8">
                     <span class="font-black text-blue-600 text-xl">LMS-SMP</span>
                     <div class="hidden md:flex space-x-4 text-sm font-medium text-gray-600">
-                        <a href="#" class="hover:text-blue-600">Beranda</a>
-                        <template x-if="role === 'siswa'">
-                            <div class="flex space-x-4">
-                                <a href="#" class="hover:text-blue-600">Literasi</a>
-                                <a href="#" class="hover:text-blue-600">Tugas & Ujian</a>
-                            </div>
-                        </template>
-                        <template x-if="role === 'guru'">
-                            <div class="flex space-x-4">
-                                <a href="#" class="hover:text-blue-600">Bahan Ajar</a>
-                                <a href="#" class="hover:text-blue-600">Kelola Ujian</a>
-                            </div>
-                        </template>
-                        <template x-if="['kepsek','pengawas','kadis'].includes(role)">
-                            <a href="#" class="text-purple-600 font-bold">Laporan Monitoring</a>
+                        <a href="#" @click="currentTab = 'home'" class="hover:text-blue-600">Beranda</a>
+                        <template x-if="['kadis', 'admin'].includes(role)">
+                            <a href="#" @click="currentTab = 'register'" class="text-green-600 font-bold">Tambah User</a>
                         </template>
                     </div>
                 </div>
@@ -62,152 +50,67 @@
                         <p class="text-sm font-bold leading-none" x-text="userName"></p>
                         <span class="text-[10px] uppercase font-bold text-gray-400" x-text="role"></span>
                     </div>
-                    <button @click="handleLogout()" class="text-red-500 hover:bg-red-50 p-2 rounded-lg">Logout</button>
+                    <button @click="handleLogout()" class="text-red-500 hover:bg-red-50 p-2 rounded-lg text-sm font-bold">Logout</button>
                 </div>
             </div>
         </nav>
 
         <main class="max-w-7xl mx-auto p-4 md:p-8">
             
-            <template x-if="role === 'siswa'">
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="md:col-span-2 space-y-6">
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border">
-                            <h3 class="font-bold text-lg mb-4">Dashboard Literasi</h3>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                <button @click="openMedia('Drive Link')" class="p-4 bg-blue-50 rounded-xl flex flex-col items-center">
-                                    <span class="text-2xl">📄</span> <span class="text-xs font-bold mt-2">DOCS/PPT</span>
-                                </button>
-                                <button @click="openMedia('Youtube Link')" class="p-4 bg-red-50 rounded-xl flex flex-col items-center">
-                                    <span class="text-2xl">🎬</span> <span class="text-xs font-bold mt-2">VIDEO</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border">
-                            <h3 class="font-bold text-lg mb-4">Ujian Tersedia</h3>
-                            <div class="border rounded-xl p-4 flex justify-between items-center bg-gray-50">
-                                <div>
-                                    <p class="font-bold">Ujian Mid Semester - Matematika</p>
-                                    <span class="text-xs text-red-500 font-bold">Durasi: 90 Menit</span>
-                                </div>
-                                <button @click="startExam('Mid Semester')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Kerjakan</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </template>
+            <div x-show="currentTab === 'home'">
+                <p class="text-gray-600">Selamat datang, <span class="font-bold" x-text="userName"></span>. Silakan pilih menu di atas.</p>
+            </div>
 
-            <template x-if="role === 'guru'">
-                <div class="space-y-6">
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border max-w-2xl mx-auto">
-                        <h2 class="text-xl font-bold mb-6">Panel Input Guru</h2>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold mb-1">MATA PELAJARAN / KELAS</label>
-                                <input type="text" placeholder="Contoh: Matematika - Kelas 8A" class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold mb-1">LINK BAHAN AJAR (G-DRIVE / YT)</label>
-                                <input type="text" placeholder="https://..." class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div class="grid grid-cols-3 gap-2">
-                                <button class="bg-blue-100 text-blue-700 py-2 rounded-lg font-bold text-xs">INPUT KUIS</button>
-                                <button class="bg-green-100 text-green-700 py-2 rounded-lg font-bold text-xs">INPUT TUGAS</button>
-                                <button class="bg-red-100 text-red-700 py-2 rounded-lg font-bold text-xs">INPUT UJIAN</button>
-                            </div>
-                        </div>
+            <div x-show="currentTab === 'register'" class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-sm border">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Pendaftaran User Baru</h2>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="email" x-model="regEmail" placeholder="Email Baru" class="p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                        <input type="password" x-model="regPass" placeholder="Password (min 6 char)" class="p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
                     </div>
-                </div>
-            </template>
+                    <input type="text" x-model="regNama" placeholder="Nama Lengkap" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <select x-model="regRole" class="p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="siswa">Siswa</option>
+                            <option value="guru">Guru</option>
+                            <option value="kepsek">Kepala Sekolah</option>
+                            <option value="pengawas">Pengawas</option>
+                            <option value="kadis">Kadis Pendidikan</option>
+                        </select>
+                        <input type="text" x-model="regSekolah" placeholder="Nama Sekolah" class="p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
 
-            <template x-if="['kepsek','pengawas','kadis'].includes(role)">
-                <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="bg-white p-6 rounded-2xl border shadow-sm">
-                            <p class="text-gray-400 text-xs font-bold uppercase">Kehadiran Siswa</p>
-                            <h4 class="text-2xl font-black text-blue-600">98.2%</h4>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl border shadow-sm">
-                            <p class="text-gray-400 text-xs font-bold uppercase">Input Materi Guru</p>
-                            <h4 class="text-2xl font-black text-green-600">124</h4>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
-                        <table class="w-full text-left">
-                            <thead class="bg-gray-50 border-b">
-                                <tr class="text-xs uppercase font-bold text-gray-500">
-                                    <th class="p-4">Nama</th>
-                                    <th class="p-4">Sekolah</th>
-                                    <th class="p-4">Aktivitas</th>
-                                    <th class="p-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-sm">
-                                <tr class="border-b">
-                                    <td class="p-4 font-bold">Siswa - Rian Utama</td>
-                                    <td class="p-4">SMPN 01</td>
-                                    <td class="p-4">Mengerjakan Ujian Harian</td>
-                                    <td class="p-4"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-black uppercase">In Progress</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <button @click="handleRegister()" :disabled="loading" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition">
+                        <span x-text="loading ? 'Mendaftarkan...' : 'Daftarkan Akun'"></span>
+                    </button>
                 </div>
-            </template>
-
+            </div>
         </main>
     </div>
 
-    <div x-show="examActive" x-cloak class="exam-overlay flex flex-col">
-        <header class="p-4 bg-red-900 flex justify-between items-center shadow-xl">
-            <h2 class="font-black tracking-tighter" x-text="'EXAM: ' + currentExamName"></h2>
-            <div class="bg-white text-red-900 px-6 py-1 rounded-full font-mono text-2xl font-bold" x-text="timerStr"></div>
-        </header>
-        <div class="flex-grow p-4 md:p-12 overflow-y-auto">
-            <div class="max-w-2xl mx-auto bg-white text-black p-8 rounded-3xl shadow-2xl">
-                <div class="mb-8">
-                    <p class="text-gray-400 text-xs font-bold mb-2">PERTANYAAN 1 DARI 20</p>
-                    <h3 class="text-xl font-medium">Berapakah hasil dari 15% dari 200.000?</h3>
-                </div>
-                <div class="space-y-3">
-                    <button class="w-full p-4 border-2 rounded-2xl text-left hover:bg-blue-50 font-bold">A. 30.000</button>
-                    <button class="w-full p-4 border-2 rounded-2xl text-left hover:bg-blue-50 font-bold">B. 25.000</button>
-                    <button class="w-full p-4 border-2 rounded-2xl text-left hover:bg-blue-50 font-bold">C. 15.000</button>
-                </div>
-                <div class="mt-12 flex justify-between">
-                    <button @click="finishExam()" class="bg-gray-200 px-8 py-3 rounded-xl font-bold">LEWATI</button>
-                    <button @click="finishExam()" class="bg-blue-600 text-white px-12 py-3 rounded-xl font-bold shadow-lg">SIMPAN & LANJUT</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // --- KONFIGURASI FIREBASE ---
         const fbConfig = {
-            apiKey: "GANTI_DENGAN_API_KEY_ANDA",
-            authDomain: "PROJECT_ANDA.firebaseapp.com",
-            databaseURL: "https://PROJECT_ANDA.firebaseio.com",
-            projectId: "PROJECT_ANDA",
+            apiKey: "AIzaSyAQCxzDVE4Uma-oNSr2wDw2WzcgDrT6ols",
+            authDomain: "lmssmpterpadu.firebaseapp.com",
+            databaseURL: "https://lmssmpterpadu-default-rtdb.firebaseio.com", // Sesuaikan URL DB Anda
+            projectId: "lmssmpterpadu",
         };
 
         function lmsApp() {
             return {
                 isLoggedIn: false,
                 loading: false,
-                authEmail: '',
-                authPass: '',
-                errorMsg: '',
-                userName: '',
-                role: '', // siswa, guru, kepsek, pengawas, kadis
-                examActive: false,
-                currentExamName: '',
-                timerStr: '90:00',
+                currentTab: 'home',
+                // Login State
+                authEmail: '', authPass: '', errorMsg: '',
+                userName: '', role: '',
+                // Register State
+                regEmail: '', regPass: '', regNama: '', regRole: 'siswa', regSekolah: '',
                 sheetUrl: 'https://script.google.com/macros/s/AKfycbzNxPiGRQ5mMYT_-5aTv1bFwyXqGoKwp53mZciiDdKV6W6UGwJ1CNq8cf-b8na5SAyq1g/exec',
 
                 initFirebase() {
                     firebase.initializeApp(fbConfig);
-                    // Cek Sesi
                     firebase.auth().onAuthStateChanged(user => {
                         if (user) this.loadUserData(user.uid);
                     });
@@ -215,12 +118,11 @@
 
                 async handleLogin() {
                     this.loading = true;
-                    this.errorMsg = '';
                     try {
                         const res = await firebase.auth().signInWithEmailAndPassword(this.authEmail, this.authPass);
                         this.loadUserData(res.user.uid);
                     } catch (e) {
-                        this.errorMsg = "Login Gagal! Periksa Email/Password.";
+                        this.errorMsg = "Login Gagal! Akun tidak ditemukan.";
                         this.loading = false;
                     }
                 },
@@ -232,63 +134,61 @@
                             this.userName = data.nama;
                             this.role = data.role;
                             this.isLoggedIn = true;
-                            // Kirim data login ke spreadsheet
-                            this.syncToSheet('Login', data.nama + ' has logged in');
                         }
                         this.loading = false;
                     });
                 },
 
-                handleLogout() {
-                    firebase.auth().signOut().then(() => {
-                        this.isLoggedIn = false;
-                        location.reload();
-                    });
-                },
+                // FUNGSI REGISTRASI OTOMATIS
+                async handleRegister() {
+                    if (this.regPass.length < 6) return alert("Password minimal 6 karakter!");
+                    this.loading = true;
+                    try {
+                        // 1. Buat User di Auth
+                        const res = await firebase.auth().createUserWithEmailAndPassword(this.regEmail, this.regPass);
+                        const newUid = res.user.uid;
 
-                startExam(name) {
-                    this.currentExamName = name;
-                    this.examActive = true;
-                    this.startTimer(90);
-                },
+                        // 2. Simpan di Database
+                        const profile = {
+                            nama: this.regNama,
+                            role: this.regRole,
+                            sekolah: this.regSekolah,
+                            createdAt: new Date().toISOString()
+                        };
+                        await firebase.database().ref('users/' + newUid).set(profile);
 
-                startTimer(minutes) {
-                    let totalSeconds = minutes * 60;
-                    let intv = setInterval(() => {
-                        let m = Math.floor(totalSeconds / 60);
-                        let s = totalSeconds % 60;
-                        this.timerStr = `${m}:${s < 10 ? '0'+s : s}`;
-                        if (totalSeconds <= 0) {
-                            clearInterval(intv);
-                            this.finishExam();
-                        }
-                        totalSeconds--;
-                    }, 1000);
-                },
+                        // 3. Sinkron ke Spreadsheet
+                        await this.syncToSheet('Registrasi Akun', `User Baru: ${this.regNama} (${this.regRole})`);
 
-                finishExam() {
-                    this.examActive = false;
-                    alert("Ujian Selesai! Skor Anda telah terkirim.");
-                    this.syncToSheet('Ujian', 'Skor: 85');
-                },
-
-                openMedia(type) {
-                    alert('Membuka file ' + type + ' dari Google Drive...');
+                        alert("Berhasil mendaftarkan " + this.regNama);
+                        
+                        // Reset Form
+                        this.regEmail = ''; this.regPass = ''; this.regNama = '';
+                        
+                    } catch (e) {
+                        alert("Gagal: " + e.message);
+                    }
+                    this.loading = false;
                 },
 
                 async syncToSheet(activity, detail) {
-                    if(!this.sheetUrl.includes('GANTI')) {
-                        fetch(this.sheetUrl, {
+                    try {
+                        await fetch(this.sheetUrl, {
                             method: 'POST',
                             mode: 'no-cors',
                             body: JSON.stringify({
-                                nama: this.userName,
-                                role: this.role,
+                                nama: this.userName || "System",
+                                role: this.role || "Admin",
                                 aktivitas: activity,
-                                detail: detail
+                                detail: detail,
+                                sekolah: this.regSekolah || "-"
                             })
                         });
-                    }
+                    } catch (err) { console.error("Sheet Sync Error"); }
+                },
+
+                handleLogout() {
+                    firebase.auth().signOut().then(() => location.reload());
                 }
             }
         }
